@@ -22,12 +22,9 @@ ui <- fluidPage(
                  )
     ),
     mainPanel("My outputs are here!",
-              tableOutput(outputId = "sighting_table"),
+              leafletOutput("sighting_map"))
               
-              leafletOutput("mymap"),
-              p(),
-              actionButton("recalc", "New points")
-    )
+    
     )
   )
 
@@ -35,13 +32,17 @@ server <- function(input, output,session) {
   
   date_select <- reactive({
     clusters %>%
-      select(datetime, lat, lon)
+      select(lat, lon)
     
   })
   
-  output$sighting_table <- renderTable({
-  date_select()
-    
+  output$sighting_map <- renderLeaflet({
+    leaflet() %>%
+      addProviderTiles(providers$Esri.WorldStreetMap,
+                       options = providerTileOptions(noWrap = TRUE)
+      ) 
+      
+ 
   })
   
 }
