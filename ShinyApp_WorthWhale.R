@@ -22,12 +22,16 @@ ui <- fluidPage(
                  )
     ),
     mainPanel("My outputs are here!",
-              tableOutput(outputId = "sighting_table")
+              tableOutput(outputId = "sighting_table"),
+              
+              leafletOutput("mymap"),
+              p(),
+              actionButton("recalc", "New points")
+    )
     )
   )
-)
 
-server <- function(input, output) {
+server <- function(input, output,session) {
   
   date_select <- reactive({
     clusters %>%
