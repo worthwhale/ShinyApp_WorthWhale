@@ -19,9 +19,9 @@ ui <- fluidPage(
     sidebarPanel("My widgets are here",
                  radioButtons(inputId = "category",
                               label = "Choose a Vessel Category:",
-                              choices = c("cruiseship","merchant","high_speed_ferry","passenger"))),
+                              choices = c("Cruise Ship"="cruiseship","Merchant"= "merchant","High Speed Ferry"="high_speed_ferry","Passenger"="passenger"))),
                mainPanel("My outputs are here!",
-              leafletOutput("sighting_map"))
+              leafletOutput("category_map"))
               
     
     )
@@ -29,13 +29,13 @@ ui <- fluidPage(
 
 server <- function(input, output,session) {
   
-  date_select <- reactive({
-    clusters %>%
-      select(lat, lon)
+  category_select <- reactive({
+    vessels %>%
+      filter(category == input$category)
     
-  })
+  }) 
   
-  output$sighting_map <- renderLeaflet({
+  output$category_map <- renderLeaflet({
     leaflet() %>%
       addProviderTiles(providers$Esri.WorldStreetMap,
                        options = providerTileOptions(noWrap = TRUE)
