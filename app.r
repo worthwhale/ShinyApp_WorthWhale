@@ -12,12 +12,9 @@ clusters <-read_csv("clusters.csv")
 vessels <- read_csv("shiny_vessels.csv")
 
 #Get Whale Data to Be in Year format instead of datetime
-clusters$datetime <- parse_date_time(clusters$datetime, "%Y-%m-%d %H:%M:%S")
-
-clusters %>% 
-mutate(year = year(datetime))
-
-
+clusters <- clusters %>% 
+  mutate(parsedate = mdy_hm(datetime)) %>% 
+  mutate(year = lubridate::year(parsedate)) 
 
 
 # Create my user interface
