@@ -5,6 +5,7 @@ library(here)
 library(leaflet)
 library(ggmap)
 library(lubridate)
+library(plyr)
 
 #Read in cluster_data.csv
 
@@ -16,6 +17,8 @@ clusters <- clusters %>%
   mutate(parsedate = mdy_hm(datetime)) %>% 
   mutate(year = lubridate::year(parsedate)) 
 
+cluster_table <- table(clusters$year)
+whale_table <- as.data.frame(cluster_table)
 
 # Create my user interface
 
@@ -45,7 +48,7 @@ server <- function(input, output) {
   
   output$whale_plot <- renderPlot({
     
-    ggplot(data = clusters, aes(x=datetime, y=cluster)) +
+    ggplot(data = whale_table, aes(x=Var1, y=Freq)) +
       geom_point()
   })
   
