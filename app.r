@@ -11,6 +11,7 @@ library(plyr)
 
 clusters <-read_csv("clusters.csv")
 vessels <- read_csv("shiny_vessels.csv")
+sightings <- read_csv("sightings.csv")
 
 #Get Whale Data to Be in Year format instead of datetime
 clusters <- clusters %>% 
@@ -19,6 +20,13 @@ clusters <- clusters %>%
 
 cluster_table <- table(clusters$year)
 whale_table <- as.data.frame(cluster_table)
+
+sightings <- sightings %>% 
+  mutate(parsedate = mdy_hm(datetime)) %>% 
+  mutate(year = lubridate::year(parsedate)) 
+
+sighting_table <- table(sightings$year)
+whalesighting_table <- as.data.frame(sighting_table)
 
 # Create my user interface
 
@@ -48,7 +56,7 @@ server <- function(input, output) {
   
   output$whale_plot <- renderPlot({
     
-    ggplot(data = whale_table, aes(x=Var1, y=Freq)) +
+    ggplot(data = whalesighting_table, aes(x=Var1, y=Freq)) +
       geom_point()
   })
   
