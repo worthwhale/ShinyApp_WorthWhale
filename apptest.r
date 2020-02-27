@@ -6,6 +6,8 @@ library(leaflet)
 library(ggmap)
 library(lubridate)
 library(plyr)
+library(RColorBrewer)
+library(wesanderson)
 
 #Read in cluster_data.csv
 
@@ -26,7 +28,12 @@ sightings <- sightings %>%
   mutate(year = lubridate::year(parsedate)) 
 
 sighting_table <- table(sightings$year)
-whalesighting_table <- as.data.frame(sighting_table)
+
+whalesighting_table <- as.data.frame(sighting_table) %>% 
+  rename(c("Var1" = "year")) %>% 
+  rename(c("Freq" = "count")) %>% 
+  filter(year == "2012" | year == "2013" | year =="2014" | year == "2015" | year == "2016" | year == "2017" | year == "2018") %>% 
+  mutate(category = "whales")
 
 # getting totals of vessels for each year and category going over 10 knots
 
@@ -69,52 +76,67 @@ vesselcount_table <- as.data.frame(vessel_graph) %>%
   rename(c("Var2" = "year")) %>% 
   rename(c("Freq" = "count"))
 
+# combine
+
+vessel_whale <- rbind(vesselcount_table, whalesighting_table)
+
+
 
 
  
 
 # Create my user interface
 
-ui <- navbarPage("Navigation Bar",
+ui <- navbarPage("Navbar!",
+                 tabPanel("Plot",
+                          h1("Vessel and Sperm Whale Abundance off West Coast of Dominica 2012-2018"),
+                          p("Sperm Whale Sightings and Vessel Categories"),
+                    
+                            sidebarLayout(
+                            sidebarPanel(
+                                         checkboxGroupInput(inputId = "category",
+                                                            label = "Choose an Input",
+                                                          choices = c("Sperm Whales" = "whales", "Cruise Ship" = "cruiseship","Merchant"= "merchant","High Speed Ferry"="high_speed_ferry")))
+                            
+                              
+                            ,
+                            mainPanel(
+                              plotOutput(outputId = "vessel_cat_plot")
+                            )
+                          )
+                 ),
                  tabPanel("Summary",
-                          h1("Sperm Whales and Vessel Traffic off the West Coast of Dominica"),
-                          p("This application allows users to explore sperm whale distrubution and vessel traffic in and out of the ports of Dominica from 2012-2018")) ,
-
-                 
-                 tabPanel("Sperm Whale and Vessel Interaction Map"),
-                 
-                 
-                 tabPanel("Whale and Vessel Abundance Line Graph",
-                          p("Sperm Whale Sightings from 2012-2018"),
-                          plotOutput(outputId = "whale_plot")),
-              
-                 sidebarLayout(
-                 sidebarPanel(
-                                radioButtons(inputId = "category",
-                                             label = "Choose a Vessel Category:",
-                                             choices = c("Cruise Ship"="cruiseship","Merchant"= "merchant","High Speed Ferry"="high_speed_ferry","Passenger"="passenger"))),
-                   mainPanel("Whale and Vessel Graph")) ,
-                 
-                 tabPanel("Vessel Speeds"),
-                 
+                          verbatimTextOutput("summary")
+                 ),
+                 tabPanel("More",
+                          verbatimTextOutput("More")),
                  theme = shinytheme("flatly"))
 
+                
 
-
-
-
-
-server <- function(input, output, session) {
+server <- function(input, output) {
   
-  output$whale_plot <- renderPlot({
-    
-    ggplot(data = whalesighting_table, aes(x=Var1, y=Freq)) +
-      geom_point()
+  vessel_category <- reactive({
+    vessel_whale %>% 
+      filter(category %in% input$category)
   })
   
-  
+  output$vessel_cat_plot <- renderPlot({
+    ggplot(data = vessel_category(),
+           aes(fill = category, x = year, y = count)) +
+      geom_bar(position = "dodge",stat = "identity") +
+      scale_fill_brewer(palette="Dark2") + 
+      labs(x= "Year", y= "Number of Vessels") +
+      theme_minimal()
+    
+ 
+      
+  })
   
 }
 
 
 shinyApp(ui = ui, server = server)
+
+
+
