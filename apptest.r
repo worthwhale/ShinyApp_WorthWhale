@@ -8,32 +8,28 @@ library(lubridate)
 library(plyr)
 library(RColorBrewer)
 library(wesanderson)
+library(ggimage)
+library(tidymv)
 
-#Read in cluster_data.csv
-
-clusters <-read_csv("clusters.csv")
+#Read in vessel and whale data
 vessels <- read_csv("shiny_vessels.csv")
 sightings <- read_csv("sightings.csv")
 
-#Get Whale Data to Be in Year format instead of datetime
-clusters <- clusters %>% 
-  mutate(parsedate = mdy_hm(datetime)) %>% 
-  mutate(year = lubridate::year(parsedate)) 
+#separate year into it's own column
+whales_year <- sightings %>%
+  select(-X1) %>%
+  separate(datetime, into = c("date", "time"), sep = " ") %>%
+  separate(date, into = c("month", "day", "year"), sep = "/")
 
-cluster_table <- table(clusters$year)
-whale_table <- as.data.frame(cluster_table)
-
-sightings <- sightings %>% 
-  mutate(parsedate = mdy_hm(datetime)) %>% 
-  mutate(year = lubridate::year(parsedate)) 
-
-sighting_table <- table(sightings$year)
-
-whalesighting_table <- as.data.frame(sighting_table) %>% 
-  rename(c("Var1" = "year")) %>% 
-  rename(c("Freq" = "count")) %>% 
+#make table of only total frequency and year
+whalesighting_table <- whales_year %>%
+  select(year, total) %>%
+  na.omit() %>%
+  group_by(year) %>%
+  dplyr::summarise(total = sum(total)) %>% 
   filter(year == "2012" | year == "2013" | year =="2014" | year == "2015" | year == "2016" | year == "2017" | year == "2018") %>% 
-  mutate(category = "whales")
+  mutate(category = "whales") %>% 
+rename(c("total" = "count"))
 
 # getting totals of vessels for each year and category going over 10 knots
 
@@ -67,7 +63,7 @@ v_2018 <- year_category %>%
 vessel_rbind <- rbind(v_2012, v_2013, v_2014, v_2015, v_2017, v_2018 )
 
 # counts of each year of each category
-vessel_graph <- table(vessel_rbind$category, vessel_rbind$year)
+vessel_graph <- table(vessel_rbind$category, vessel_rbind$year) 
 
 # make into dataframe for graph
 
@@ -88,7 +84,15 @@ vessel_whale <- rbind(vesselcount_table, whalesighting_table)
 # Create my user interface
 
 ui <- navbarPage("Navbar!",
-                 tabPanel("Plot",
+                 tabPanel("Summary",
+                          p("This app allows users to explore sperm whale sightings from 2012 - 2018 , (data missing for 2013) and vessel traffic in and out of the ports based on individual vessel identification number (MMSI), with data missing from 2016") ,
+                          verbatimTextOutput("summary")
+                 ),
+                 tabPanel("Interactive Map",
+                          verbatimTextOutput("Interactive Map")),
+                 tabPanel("Vessel Speed Map",
+                          verbatimTextOutput("Vessel Speed Map")) ,
+                 tabPanel("Vessel and Whale Abundance Graph",
                           h1("Vessel and Sperm Whale Abundance off West Coast of Dominica 2012-2018"),
                           p("Sperm Whale Sightings and Vessel Categories"),
                     
@@ -105,11 +109,7 @@ ui <- navbarPage("Navbar!",
                             )
                           )
                  ),
-                 tabPanel("Summary",
-                          verbatimTextOutput("summary")
-                 ),
-                 tabPanel("More",
-                          verbatimTextOutput("More")),
+                 
                  theme = shinytheme("flatly"))
 
                 
@@ -123,11 +123,11 @@ server <- function(input, output) {
   
   output$vessel_cat_plot <- renderPlot({
     ggplot(data = vessel_category(),
-           aes(fill = category, x = year, y = count)) +
-      geom_bar(position = "dodge",stat = "identity") +
-      scale_fill_brewer(palette="Dark2") + 
-      labs(x= "Year", y= "Number of Vessels") +
-      theme_minimal()
+           aes( x = year, y = count, group = category, color = category)) +
+      geom_line() +
+      scale_fill_brewer(palette="Set1") + 
+      labs(x= "Year", y= "Quantity") +
+      theme_minimal() 
     
  
       
@@ -136,7 +136,7 @@ server <- function(input, output) {
 }
 
 
-shinyApp(ui = ui, server = server)
+shinyApp(ui = ui, server = server) 
 
 
 
