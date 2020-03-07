@@ -153,17 +153,16 @@ server <- function(input, output) {
   })
   
   icons <- awesomeIcons(
-    icon = 'boat-outline',
-    #iconColor = 'orange',
+    icon = 'ship',
+    iconColor = 'green',
     markerColor = "black",
-    library = 'ionicon'
+    library = 'fa'
   )
   
   output$speed_map <- renderLeaflet({
     leaflet() %>%
       setView(lng = -61.475, lat = 15.4159, zoom = 8) %>% 
-      addAwesomeMarkers(data = speed_select, icon = icons) %>% 
-      #addMarkers(data = speed_select()) %>% 
+      addAwesomeMarkers(data = speed_select(), icon = icons) %>% 
       addProviderTiles(providers$Esri.WorldStreetMap,
                        options = providerTileOptions(noWrap = TRUE)
       ) 
