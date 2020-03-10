@@ -10,6 +10,8 @@ library(RColorBrewer)
 library(wesanderson)
 library(ggimage)
 library(tidymv)
+library(png)
+library(IMAGE) 
 
 #Read in vessel and whale data
 vessels <- read_csv("shiny_vessels.csv")
@@ -29,12 +31,12 @@ whalesighting_table <- whales_year %>%
   dplyr::summarise(total = sum(total)) %>% 
   filter(year == "2012" | year == "2013" | year =="2014" | year == "2015" | year == "2016" | year == "2017" | year == "2018") %>% 
   mutate(category = "whales") %>% 
-rename(c("total" = "count"))
+  rename(c("total" = "count"))
 
 # getting totals of vessels for each year and category going over 10 knots
 
 year_category <- vessels %>% 
-mutate(year = year(timestamp))
+  mutate(year = year(timestamp))
 
 v_2012 <- year_category %>% 
   filter(year == "2012") %>% 
@@ -72,39 +74,52 @@ vesselcount_table <- as.data.frame(vessel_graph) %>%
   rename(c("Var2" = "year")) %>% 
   rename(c("Freq" = "count"))
 
+# bring in vessel totals
+vessel_totals <- read_csv("vessel_totals.csv")
+  
+  
+
 # combine
 
-vessel_whale <- rbind(vesselcount_table, whalesighting_table)
+vessel_whale <- rbind(vesselcount_table, whalesighting_table, vessel_totals)
 
 
 
 
- 
+
 
 # Create my user interface
 
-ui <- navbarPage("Navbar!",
-                 tabPanel("Summary" ,
-                          p("This app allows users to explore sperm whale sightings from 2012 - 2018 , (data missing for 2013) and vessel traffic in and out of the ports based on individual vessel identification number (MMSI), with data missing from 2016") ,
-                          verbatimTextOutput("summary")) ,
+ui <- navbarPage("Navigation",
+                 tabPanel("Summary", tags$img(src = "sperm.png", align = "center", height = 800, width=800) ,
+                          p("This app allows users to explore sperm whale sightings from 2012 - 2018 , (data missing for 2013) and vessel traffic around the island and traveling in and out of the ports of Portsmouth to the North and Roseau to the South. Vessel traffic is based on individual vessel identification number (MMSI), with data missing from 2016 as well as only December data for 2012. For visualization and analytical reasons, each vessel that visits the area is only accounted for once a year.") ,
+                          verbatimTextOutput("summary")
+                 ),
                  tabPanel("Interactive Map",
-                          verbatimTextOutput("Interactive Map")) ,
+                          verbatimTextOutput("Interactive Map")),
                  tabPanel("Vessel Speed Map",
                           verbatimTextOutput("Vessel Speed Map")) ,
                  tabPanel("Vessel and Whale Abundance Graph",
                           h1("Vessel and Sperm Whale Abundance off West Coast of Dominica 2012-2018"),
                           p("Sperm Whale Sightings and Vessel Categories"),
-                    
-                            sidebarLayout(
+                          
+                          sidebarLayout(
                             sidebarPanel(
-                                         checkboxGroupInput(inputId = "category",
-                                                            label = "Choose an Input",
-                                                          choices = c("Sperm Whales" = "whales", "Cruise Ship" = "cruiseship","Merchant"= "merchant","High Speed Ferry"="high_speed_ferry")))
-                   ,
+                              checkboxGroupInput(inputId = "category",
+                                                 label = "Choose an Input",
+                                                 choices = c("Sperm Whales" = "whales", "Vessel Totals" = "Total Vessel", "Cruise Ship" = "cruiseship","Merchant"= "merchant","High Speed Ferry"="high_speed_ferry")))
+                            
+                            
+                            ,
                             mainPanel(
-                              plotOutput(outputId = "vessel_cat_plot")))
+                              plotOutput(outputId = "vessel_cat_plot")
+                            )
+                          )
+                 ),
+                 
+                 theme = shinytheme("flatly"))
 
-                
+
 
 server <- function(input, output) {
   
@@ -121,14 +136,11 @@ server <- function(input, output) {
       labs(x= "Year", y= "Quantity") +
       theme_minimal() 
     
- 
-      
+    
+    
   })
   
 }
 
 
 shinyApp(ui = ui, server = server) 
-
-
-
