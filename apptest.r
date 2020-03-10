@@ -77,7 +77,7 @@ vesselcount_table <- as.data.frame(vessel_graph) %>%
 vessel_whale <- rbind(vesselcount_table, whalesighting_table)
 
 
-
+######################################################################################################
 
  
 
@@ -88,10 +88,29 @@ ui <- navbarPage("Navbar!",
                           p("This app allows users to explore sperm whale sightings from 2012 - 2018 , (data missing for 2013) and vessel traffic in and out of the ports based on individual vessel identification number (MMSI), with data missing from 2016") ,
                           verbatimTextOutput("summary")) ,
                  tabPanel("Interactive Map",
+<<<<<<< HEAD
                           verbatimTextOutput("Interactive Map")) ,
+=======
+                          verbatimTextOutput("Interactive Map")),
+                 #Shellby's Tab
+>>>>>>> 94e418620a3add1f36164987985ac1002ff5877e
                  tabPanel("Vessel Speed Map",
-                          verbatimTextOutput("Vessel Speed Map")) ,
-                 tabPanel("Vessel and Whale Abundance Graph",
+                          verbatimTextOutput("Vessel Speed Map"),
+                          
+                          sidebarLayout(
+                            sidebarPanel("My widgets are here",
+                                         radioButtons(inputId = "show_hide",
+                                                      label = "Whale Presence Points:",
+                                                      choices = c("Whale Presence")),
+                                         sliderInput("slider2", 
+                                                     label = h3("Vessel Speed Range"), 
+                                                     min = 10,
+                                                     max = 40,
+                                                     value = c(0,0))
+                            ),
+                            mainPanel("My outputs are here!",
+                                      leafletOutput("speed_map"))),
+                tabPanel("Vessel and Whale Abundance Graph",
                           h1("Vessel and Sperm Whale Abundance off West Coast of Dominica 2012-2018"),
                           p("Sperm Whale Sightings and Vessel Categories"),
                     
@@ -102,10 +121,20 @@ ui <- navbarPage("Navbar!",
                                                           choices = c("Sperm Whales" = "whales", "Cruise Ship" = "cruiseship","Merchant"= "merchant","High Speed Ferry"="high_speed_ferry")))
                    ,
                             mainPanel(
+<<<<<<< HEAD
                               plotOutput(outputId = "vessel_cat_plot")))
 
                 
+=======
+                              plotOutput(outputId = "vessel_cat_plot")
+                            )
+                          )
+                 ),
+                 
+                 theme = shinytheme("flatly")))
+>>>>>>> 94e418620a3add1f36164987985ac1002ff5877e
 
+########################################################################################################                
 server <- function(input, output) {
   
   vessel_category <- reactive({
@@ -121,8 +150,31 @@ server <- function(input, output) {
       labs(x= "Year", y= "Quantity") +
       theme_minimal() 
     
- 
       
+  })
+  
+  speed_select <- eventReactive(input$slider2, {
+    vessel_rbind %>% 
+      filter(speed>input$slider2[1], speed<input$slider2[2]) 
+    
+  })
+  
+  icons <- awesomeIcons(
+    icon = 'ship',
+    iconColor = 'green',
+    markerColor = "black",
+    library = 'fa'
+  )
+  
+  output$speed_map <- renderLeaflet({
+    leaflet() %>%
+      setView(lng = -61.475, lat = 15.4159, zoom = 8) %>% 
+      addAwesomeMarkers(data = speed_select(), icon = icons) %>% 
+      addProviderTiles(providers$Esri.WorldStreetMap,
+                       options = providerTileOptions(noWrap = TRUE)
+      ) 
+    
+    
   })
   
 }
