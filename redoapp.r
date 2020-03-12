@@ -96,7 +96,21 @@ ui <- navbarPage("Navigation",
                  tabPanel("Interactive Map",
                           verbatimTextOutput("Interactive Map")),
                  tabPanel("Vessel Speed Map",
-                          verbatimTextOutput("Vessel Speed Map")) ,
+                          verbatimTextOutput("Vessel Speed Map"),
+                          
+                          sidebarLayout(
+                            sidebarPanel("My widgets are here",
+                                         radioButtons(inputId = "show_hide",
+                                                      label = "Whale Presence Points:",
+                                                      choices = c("Whale Presence")),
+                                         sliderInput("slider2", 
+                                                     label = h3("Vessel Speed Range"), 
+                                                     min = 10,
+                                                     max = 40,
+                                                     value = c(0,0))
+                            ),
+                            mainPanel("My outputs are here!",
+                                      leafletOutput("speed_map"))),
                  tabPanel("Vessel and Whale Abundance Graph",
                           h1("Vessel and Sperm Whale Abundance off West Coast of Dominica 2012-2018"),
                           p("Sperm Whale Sightings and Vessel Categories"),
@@ -115,9 +129,9 @@ ui <- navbarPage("Navigation",
                           )
                  ),
                  
-                 theme = shinytheme("flatly"))
+                 theme = shinytheme("flatly")))
 
-
+##########################################################################################
 
 server <- function(input, output) {
   
@@ -134,6 +148,31 @@ server <- function(input, output) {
       labs(x= "Year", y= "Quantity") +
       theme_minimal() 
     
+    
+    
+  })
+  
+  speed_select <- eventReactive(input$slider2, {
+    vessel_rbind %>% 
+      filter(speed>input$slider2[1], speed<input$slider2[2]) 
+    
+  })
+  
+  icons <- awesomeIcons(
+    icon = 'ship',
+    iconColor = 'green',
+    markerColor = "black",
+    library = 'fa'
+  )
+  
+  output$speed_map <- renderLeaflet({
+    leaflet() %>%
+      setView(lng = -61.475, lat = 15.4159, zoom = 8) %>% 
+      addAwesomeMarkers(data = speed_select(), icon = icons) %>% 
+      addCircleMarkers(data = sightings, color = "red") %>% 
+      addProviderTiles(providers$Esri.WorldStreetMap,
+                       options = providerTileOptions(noWrap = TRUE)
+      ) 
     
     
   })
