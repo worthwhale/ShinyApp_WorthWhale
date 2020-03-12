@@ -163,6 +163,7 @@ server <- function(input, output) {
     leaflet() %>%
       setView(lng = -61.475, lat = 15.4159, zoom = 8) %>% 
       addAwesomeMarkers(data = speed_select(), icon = icons) %>% 
+      addCircleMarkers(data = sightings, color = "red") %>% 
       addProviderTiles(providers$Esri.WorldStreetMap,
                        options = providerTileOptions(noWrap = TRUE)
       ) 
