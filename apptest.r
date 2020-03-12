@@ -84,13 +84,16 @@ vessel_whale <- rbind(vesselcount_table, whalesighting_table)
 # Create my user interface
 
 ui <- navbarPage("Navbar!",
-                 tabPanel("Summary",
+                 tabPanel("Summary" ,
                           p("This app allows users to explore sperm whale sightings from 2012 - 2018 , (data missing for 2013) and vessel traffic in and out of the ports based on individual vessel identification number (MMSI), with data missing from 2016") ,
-                          verbatimTextOutput("summary")
-                 ),
+                          verbatimTextOutput("summary")) ,
                  tabPanel("Interactive Map",
+<<<<<<< HEAD
+                          verbatimTextOutput("Interactive Map")) ,
+=======
                           verbatimTextOutput("Interactive Map")),
                  #Shellby's Tab
+>>>>>>> 94e418620a3add1f36164987985ac1002ff5877e
                  tabPanel("Vessel Speed Map",
                           verbatimTextOutput("Vessel Speed Map"),
                           
@@ -116,16 +119,20 @@ ui <- navbarPage("Navbar!",
                                          checkboxGroupInput(inputId = "category",
                                                             label = "Choose an Input",
                                                           choices = c("Sperm Whales" = "whales", "Cruise Ship" = "cruiseship","Merchant"= "merchant","High Speed Ferry"="high_speed_ferry")))
-                            
-                              
-                            ,
+                   ,
                             mainPanel(
+<<<<<<< HEAD
+                              plotOutput(outputId = "vessel_cat_plot")))
+
+                
+=======
                               plotOutput(outputId = "vessel_cat_plot")
                             )
                           )
                  ),
                  
                  theme = shinytheme("flatly")))
+>>>>>>> 94e418620a3add1f36164987985ac1002ff5877e
 
 ########################################################################################################                
 server <- function(input, output) {
