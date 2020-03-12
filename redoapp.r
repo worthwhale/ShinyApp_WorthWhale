@@ -76,8 +76,6 @@ vesselcount_table <- as.data.frame(vessel_graph) %>%
 
 # bring in vessel totals
 vessel_totals <- read_csv("vessel_totals.csv")
-  
-  
 
 # combine
 
