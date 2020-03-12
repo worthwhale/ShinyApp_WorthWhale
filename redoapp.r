@@ -79,7 +79,7 @@ vessel_totals <- read_csv("vessel_totals.csv")
 
 # combine
 
-vessel_whale <- rbind(vesselcount_table, whalesighting_table, vessel_totals)
+vessel_whale <- rbind(vesselcount_table, whalesighting_table, vessel_totals) 
 
 
 
@@ -89,7 +89,7 @@ vessel_whale <- rbind(vesselcount_table, whalesighting_table, vessel_totals)
 # Create my user interface
 
 ui <- navbarPage("Navigation",
-                 tabPanel("Summary", tags$img(src = "sperm.png", align = "center", height = 800, width=800) ,
+                 tabPanel("Summary", tags$img(src = "sw.png", align = "center", height = 500, width=800) ,
                           p("This app allows users to explore sperm whale sightings from 2012 - 2018 , (data missing for 2013) and vessel traffic around the island and traveling in and out of the ports of Portsmouth to the North and Roseau to the South. Vessel traffic is based on individual vessel identification number (MMSI), with data missing from 2016 as well as only December data for 2012. For visualization and analytical reasons, each vessel that visits the area is only accounted for once a year.") ,
                           verbatimTextOutput("summary")
                  ),
@@ -111,6 +111,8 @@ ui <- navbarPage("Navigation",
                             ),
                             mainPanel("My outputs are here!",
                                       leafletOutput("speed_map"))),
+                            
+                            
                  tabPanel("Vessel and Whale Abundance Graph",
                           h1("Vessel and Sperm Whale Abundance off West Coast of Dominica 2012-2018"),
                           p("Sperm Whale Sightings and Vessel Categories"),
