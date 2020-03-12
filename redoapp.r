@@ -81,6 +81,17 @@ vessel_totals <- read_csv("vessel_totals.csv")
 
 vessel_whale <- rbind(vesselcount_table, whalesighting_table, vessel_totals) 
 
+##Wrangling for whales and vessel graph 
+
+year_vessel <- vessels %>%
+  mutate(year = year(timestamp))
+
+whales_vessels <- bind_rows(sightings, year_vessel)
+
+whales_vessels_sf <- st_as_sf(whales_vessels, coords = c("lon", "lat"), crs = 4326)
+
+whales_sf <- st_as_sf(sightings, coords = c("lon", "lat"), crs = 4326)
+
 
 
 
