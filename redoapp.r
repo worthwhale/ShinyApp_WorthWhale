@@ -11,7 +11,10 @@ library(wesanderson)
 library(ggimage)
 library(tidymv)
 library(png)
-library(IMAGE) 
+library(IMAGE)
+library(sf)
+library(leaflet.extras)
+library(fs)
 
 #Read in vessel and whale data
 vessels <- read_csv("shiny_vessels.csv")
@@ -104,9 +107,8 @@ ui <- navbarPage("Navigation",
                           p("This app allows users to explore sperm whale sightings from 2012 - 2018 , (data missing for 2013) and vessel traffic around the island and traveling in and out of the ports of Portsmouth to the North and Roseau to the South. Vessel traffic is based on individual vessel identification number (MMSI), with data missing from 2016 as well as only December data for 2012. For visualization and analytical reasons, each vessel that visits the area is only accounted for once a year.") ,
                           verbatimTextOutput("summary")
                  ),
-                 tabPanel("Interactive Map",
-                          verbatimTextOutput("Interactive Map"),
-                          "Meet the Whales",
+                 
+                 tabPanel("Meet The Whales",
                           leafletOutput(outputId = "whale_map", width="100%",height="800px"),
                           checkboxGroupInput(inputId = "year",
                                              choices = c(unique(whales_sf$year)), 
@@ -114,6 +116,7 @@ ui <- navbarPage("Navigation",
                                              selected = 2005)
                           
                  ),
+                 
                  tabPanel("Vessel Speed Map",
                           verbatimTextOutput("Vessel Speed Map"),
                           
@@ -198,28 +201,6 @@ server <- function(input, output) {
     
   })
   
-  whale_data <- reactive({
-    whales_sf %>%
-      filter(year == input$year)
-  })
-  
-  #define color pallate 
-  colorpal <- colorFactor(palette = c("#16a085", "#27ae60", "#2980b9", "#8e44ad", "#6D214F", "#e74c3c", "#c0392b", "#d35400", "#f39c12", "#1e272e", "#2c3e50", "#7f8c8d"), levels = c("2005", "2007", "2008", "2009", "2010", "2011", "2012", "2014", "2015", "2016", "2017", "2018"))
-  
-  
-  
-  #create leaflet map  
-  output$whale_map <- renderLeaflet({
-    leaflet() %>%
-      setView(lng = -61.475, lat = 15.4159, zoom =10) %>%
-      addCircles(data = whale_data(), weight = 10, color = ~colorpal(year), fillOpacity = 1) %>%
-      addLegend(position = "bottomright", pal = colorpal, values = whales_sf$year,
-                title = "Year of Whale Sighting",
-                opacity = 1) %>%
-      addProviderTiles(providers$Esri.WorldStreetMap,
-                       options = providerTileOptions(noWrap = TRUE)
-      ) 
-  })
   
 }
 
