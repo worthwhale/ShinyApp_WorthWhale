@@ -7,7 +7,6 @@ library(ggmap)
 library(lubridate)
 library(plyr)
 library(RColorBrewer)
-library(wesanderson)
 library(ggimage)
 library(tidymv)
 library(png)
@@ -17,8 +16,16 @@ library(IMAGE)
 vessels <- read_csv("shiny_vessels.csv")
 sightings <- read_csv("sightings.csv")
 
+#Get Whale Data to Be in Year format instead of datetime
+sightings_1 <- sightings %>% 
+  mutate(parsedate = mdy_hm(datetime)) %>% 
+  mutate(year = lubridate::year(parsedate)) 
+
+sighting_table <- table(sightings_1$year)
+whalesighting_table <- as.data.frame(sighting_table)
+
 #separate year into it's own column
-whales_year <- sightings %>%
+whales_year <- sightings_1 %>%
   select(-X1) %>%
   separate(datetime, into = c("date", "time"), sep = " ") %>%
   separate(date, into = c("month", "day", "year"), sep = "/")
@@ -86,11 +93,11 @@ vessel_whale <- rbind(vesselcount_table, whalesighting_table, vessel_totals)
 year_vessel <- vessels %>%
   mutate(year = year(timestamp))
 
-whales_vessels <- bind_rows(sightings, year_vessel)
+whales_vessels <- bind_rows(sightings_1, year_vessel)
 
 whales_vessels_sf <- st_as_sf(whales_vessels, coords = c("lon", "lat"), crs = 4326)
 
-whales_sf <- st_as_sf(sightings, coords = c("lon", "lat"), crs = 4326)
+whales_sf <- st_as_sf(sightings_1, coords = c("lon", "lat"), crs = 4326)
 
 
 
@@ -105,18 +112,15 @@ ui <- navbarPage("Navigation",
                           verbatimTextOutput("summary")
                  ),
                  tabPanel("Interactive Map",
-                          verbatimTextOutput("Interactive Map"),
-                          "Meet the Whales",
                           leafletOutput(outputId = "whale_map", width="100%",height="800px"),
-                          checkboxGroupInput(inputId = "year",
-                                             choices = c(unique(whales_sf$year)), 
-                                             label = "Select Whale CLuster Sighting Year", 
-                                             selected = 2005)
-                          
+                            sidebarPanel("whales here",
+                                         checkboxGroupInput(inputId = "year",
+                                                            choices = c(unique(whales_sf$year)), 
+                                                            label = "Select Whale CLuster Sighting Year",
+                                                            selected = 2005))
                  ),
                  tabPanel("Vessel Speed Map",
                           verbatimTextOutput("Vessel Speed Map"),
-                          
                           sidebarLayout(
                             sidebarPanel("My widgets are here",
                                          radioButtons(inputId = "show_hide",
@@ -129,9 +133,9 @@ ui <- navbarPage("Navigation",
                                                      value = c(0,0))
                             ),
                             mainPanel("My outputs are here!",
-                                      leafletOutput("speed_map"))),
-                            
-                            
+                                      leafletOutput("speed_map")
+                                      )
+                ),
                  tabPanel("Vessel and Whale Abundance Graph",
                           h1("Vessel and Sperm Whale Abundance off West Coast of Dominica 2012-2018"),
                           p("Sperm Whale Sightings and Vessel Categories"),
