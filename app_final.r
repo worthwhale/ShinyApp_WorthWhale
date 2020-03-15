@@ -91,7 +91,7 @@ ui <- navbarPage("Navigation Bar",
                  theme = shinytheme("flatly") ,
                  tabPanel("Summary", tags$img(src = "sw.png", align = "center", height = 500, width=800) ,
                           p("This app allows users to explore sperm whale sightings and vessel traffic from 2012 – 2018 off the west coast of Dominica. Due to extreme weather events, data is missing for 2013 for whale sightings, and 2016 and most of 2012 for vessels. Whale sighting points are documented as clusters, meaning the research team sighted a group of sperm whales on the surface with coordinated behavior and within close proximity of each other. A total of 521 individual sperm whales have been identified in the eastern Caribbean via photo-identification, primarily off of Guadeloupe and Dominica. Vessel traffic is based on individual vessel identification number (Maritime Mobile Service Identity - MMSI). For data processing reasons, each vessel that visits the area is only accounted for once a year in this app. This app should be used as a visualization tool and not for analytical purposes. While navigating the app, users can explore the abundance of vessels and whales from 2012-2018, and visualize areas where vessels may be a threat to sperm whales due to their speed.") ,
-                          p("Data Source: Sperm Whale Sightings and AIS Vessel Data - Dr.Shane Gero, Dominica Sperm Whale Project"),
+                          p("Data Source: Sperm Whale Sightings and AIS Vessel Data - Dr.Shane Gero, Dominica Sperm Whale Project. Photo Credit: Amanda Cotton"),
 
                           verbatimTextOutput("summary")
                  ),
@@ -106,7 +106,7 @@ ui <- navbarPage("Navigation Bar",
                  ),
                  tabPanel("Whale and Vessel Abundance and Interactions",
                           p("Research shows that vessels travelling 10 knots or higher pose a greater threat to whales, and when ships reduce their speed to 10 knots or less, the mortality risk is reduced by 50%. To display vessel abundance at intervals of interest, use the slider bar to select range.") ,
-                          p("The line graph plots vessels and whale clusters per year for Dominica"),
+                          p("The line graph plots number of vessels and whales sighted per year from 2012- 2018 off the west coast of Dominica. Number of  vessels is measured by each individual MMSI that came to Dominica each year, if any vessel returned, it is not included in the number of vessels. The whale abundance is measured in number of whales within each cluster sighting per year. A whale can be seen multiple days a  year in different clusters."),
                           verbatimTextOutput("Vessel Speed Map"),
                           sidebarLayout(
                             sidebarPanel(
@@ -182,7 +182,7 @@ server <- function(input, output) {
     leaflet() %>%
       setView(lng = -61.475, lat = 15.4159, zoom = 8) %>% 
       addAwesomeMarkers(data = speed_select(),icon = icons) %>% 
-      addCircles(data = sightings, weight = 8 ,color = "red") %>% 
+      addCircles(data = sightings, weight = 7 ,color = "red") %>% 
       addProviderTiles(providers$Esri.WorldStreetMap,
                        options = providerTileOptions(noWrap = TRUE)
       ) 
